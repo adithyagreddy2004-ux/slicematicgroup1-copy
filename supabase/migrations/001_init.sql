@@ -70,6 +70,14 @@ create policy "staff read order_items" on order_items for select to authenticate
 create policy "staff read waiter_calls" on waiter_calls for select to authenticated using (true);
 create policy "staff update waiter_calls" on waiter_calls for update to authenticated using (true);
 
+-- Table grants: Supabase no longer auto-exposes new tables to API roles.
+-- RLS policies above still govern row-level access for anon/authenticated.
+grant usage on schema public to anon, authenticated, service_role;
+grant select on bases, pizzas, toppings to anon, authenticated;
+grant select on orders, order_items, waiter_calls to authenticated;
+grant update on orders, waiter_calls to authenticated;
+grant all on bases, pizzas, toppings, orders, order_items, waiter_calls to service_role;
+
 -- Realtime: kitchen and admin subscribe to these tables.
 alter publication supabase_realtime add table orders;
 alter publication supabase_realtime add table waiter_calls;
