@@ -167,7 +167,7 @@ function RadarPing() {
 const STAGE_ORDER: Stage[] = ["sent", "oven", "delivering", "served"];
 
 export default function Confirmation() {
-  const { customerName, tableId, orderId, confirmedBill, quantity, paymentMode } = useOrder();
+  const { customerName, tableId, orderId, confirmedBill, quantity, paymentMode, startNewOrder } = useOrder();
   const [stage, setStage] = useState<Stage>("sent");
 
   useEffect(() => {
@@ -253,6 +253,17 @@ export default function Confirmation() {
           </p>
         )}
       </motion.div>
+
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        whileTap={{ scale: 0.97 }}
+        onClick={startNewOrder}
+        className="glow-button mt-4 w-full rounded-xl bg-[var(--accent)] py-3 font-semibold text-black"
+      >
+        Order another pizza 🍕
+      </motion.button>
     </motion.div>
   );
 }

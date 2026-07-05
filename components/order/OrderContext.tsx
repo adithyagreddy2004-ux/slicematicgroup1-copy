@@ -30,6 +30,7 @@ interface OrderState {
   setOrderId: (v: string | null) => void;
   confirmedBill: Bill | null;
   setConfirmedBill: (v: Bill | null) => void;
+  startNewOrder: () => void;
 }
 
 const OrderContext = createContext<OrderState | null>(null);
@@ -52,6 +53,19 @@ export function OrderProvider({ tableId, children }: { tableId: string; children
       current.includes(id) ? current.filter((t) => t !== id) : [...current, id]
     );
 
+  // Same guest, fresh cart — jumps straight back to the menu.
+  const startNewOrder = () => {
+    setBaseId(null);
+    setPizzaId(null);
+    setToppingIds([]);
+    setBeverageIds([]);
+    setQuantity(1);
+    setPaymentMode(null);
+    setOrderId(null);
+    setConfirmedBill(null);
+    setStep("menu");
+  };
+
   const toggleBeverage = (id: string) =>
     setBeverageIds((current) =>
       current.includes(id) ? current.filter((b) => b !== id) : [...current, id]
@@ -66,6 +80,7 @@ export function OrderProvider({ tableId, children }: { tableId: string; children
         toppingIds, toggleTopping, beverageIds, toggleBeverage, quantity, setQuantity,
         paymentMode, setPaymentMode,
         orderId, setOrderId, confirmedBill, setConfirmedBill,
+        startNewOrder,
       }}
     >
       {children}
