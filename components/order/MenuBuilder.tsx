@@ -23,21 +23,21 @@ function SelectableCard({
       whileTap={{ scale: 0.95 }}
       animate={selected ? { scale: [1, 1.04, 1] } : {}}
       transition={{ duration: 0.25 }}
-      className={`flex w-full items-center justify-between gap-2 rounded-xl border px-4 py-3 text-left backdrop-blur transition-colors ${
+      className={`flex w-full items-center justify-between gap-2 overflow-hidden rounded-xl border px-4 py-3 text-left backdrop-blur transition-colors ${
         selected
           ? "border-[var(--accent)] bg-[var(--accent)]/15 shadow-[0_0_22px_-4px_var(--accent)]"
           : "border-white/10 bg-white/5 hover:border-white/30"
       }`}
     >
-      <span className="flex items-center gap-2 text-sm font-medium">
+      <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
         <span
           className={`inline-block h-2 w-2 shrink-0 rounded-full transition ${
             selected ? "bg-[var(--accent)] shadow-[0_0_8px_var(--accent)]" : "bg-white/20"
           }`}
         />
-        {item.name}
+        <span className="truncate">{item.name}</span>
       </span>
-      <span className={`text-sm ${selected ? "text-[var(--accent)]" : "text-zinc-400"}`}>
+      <span className={`shrink-0 text-sm ${selected ? "text-[var(--accent)]" : "text-zinc-400"}`}>
         {formatINR(Number(item.price))}
       </span>
     </motion.button>
@@ -173,10 +173,11 @@ export default function MenuBuilder() {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -24 }}
-      className="mx-auto w-full max-w-md pb-72"
+      className="mx-auto w-full max-w-md pb-80"
     >
-      {/* pizza stage — stays pinned while the customer scrolls the menu */}
-      <div className="sticky top-0 z-20 bg-gradient-to-b from-[var(--background)] from-75% to-transparent px-6 pb-4 pt-3">
+      {/* pizza stage — stays pinned while the customer scrolls the menu.
+          Opaque + blurred so scrolling menu items never bleed through onto the pizza. */}
+      <div className="sticky top-0 z-20 bg-[var(--background)]/95 px-6 pb-4 pt-3 shadow-[0_14px_26px_-16px_rgba(0,0,0,0.95)] backdrop-blur-md">
         <p className="mb-1 text-center text-xs font-semibold uppercase tracking-[0.3em] text-[var(--accent)]">
           Pizza forge
         </p>
