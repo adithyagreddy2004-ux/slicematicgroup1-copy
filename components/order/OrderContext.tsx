@@ -28,6 +28,8 @@ interface OrderState {
   setPaymentMode: (v: PaymentMode | null) => void;
   orderId: string | null;
   setOrderId: (v: string | null) => void;
+  acceptedUpsellEventId: string | null;
+  setAcceptedUpsellEventId: (v: string | null) => void;
   confirmedBill: Bill | null;
   setConfirmedBill: (v: Bill | null) => void;
   startNewOrder: () => void;
@@ -46,6 +48,7 @@ export function OrderProvider({ tableId, children }: { tableId: string; children
   const [quantity, setQuantity] = useState(1);
   const [paymentMode, setPaymentMode] = useState<PaymentMode | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [acceptedUpsellEventId, setAcceptedUpsellEventId] = useState<string | null>(null);
   const [confirmedBill, setConfirmedBill] = useState<Bill | null>(null);
 
   const toggleTopping = (id: string) =>
@@ -62,6 +65,7 @@ export function OrderProvider({ tableId, children }: { tableId: string; children
     setQuantity(1);
     setPaymentMode(null);
     setOrderId(null);
+    setAcceptedUpsellEventId(null);
     setConfirmedBill(null);
     setStep("menu");
   };
@@ -79,7 +83,8 @@ export function OrderProvider({ tableId, children }: { tableId: string; children
         baseId, setBaseId, pizzaId, setPizzaId,
         toppingIds, toggleTopping, beverageIds, toggleBeverage, quantity, setQuantity,
         paymentMode, setPaymentMode,
-        orderId, setOrderId, confirmedBill, setConfirmedBill,
+        orderId, setOrderId, acceptedUpsellEventId, setAcceptedUpsellEventId,
+        confirmedBill, setConfirmedBill,
         startNewOrder,
       }}
     >

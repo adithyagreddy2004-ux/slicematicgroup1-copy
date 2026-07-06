@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useOrder } from "./OrderContext";
 import BillLines from "./BillLines";
 import PizzaCanvas from "./PizzaCanvas";
+import UpsellSuggestion from "./UpsellSuggestion";
 import { supabase } from "@/lib/supabase/client";
 import { computeBill, formatINR } from "@/lib/pricing";
 import { validateQuantity } from "@/lib/validation";
@@ -172,7 +173,7 @@ export default function MenuBuilder() {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -24 }}
-      className="mx-auto w-full max-w-md pb-48"
+      className="mx-auto w-full max-w-md pb-72"
     >
       {/* pizza stage — stays pinned while the customer scrolls the menu */}
       <div className="sticky top-0 z-20 bg-gradient-to-b from-[var(--background)] from-75% to-transparent px-6 pb-4 pt-3">
@@ -287,6 +288,13 @@ export default function MenuBuilder() {
         <div className="mx-auto max-w-md">
           {bill ? (
             <>
+              <UpsellSuggestion
+                base={selectedBase}
+                pizza={selectedPizza}
+                toppings={selectedToppings}
+                beverages={selectedBeverages}
+                quantity={quantity}
+              />
               <BillLines bill={bill} quantity={quantity} />
               <motion.button
                 onClick={() => setStep("payment")}

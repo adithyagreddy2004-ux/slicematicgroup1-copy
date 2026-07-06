@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { buildOrder, OrderPayload } from "@/lib/orders";
 import type { Menu } from "@/lib/types";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function POST(request: Request) {
   try {
     let payload: OrderPayload;
@@ -54,6 +56,17 @@ export async function POST(request: Request) {
         { error: "Could not save your order. Please try again." },
         { status: 503 }
       );
+    }
+
+    if (
+      typeof payload.acceptedUpsellEventId === "string" &&
+      UUID_RE.test(payload.acceptedUpsellEventId)
+    ) {
+      await db
+        .from("upsell_events")
+        .update({ order_id: inserted.data.id, updated_at: new Date().toISOString() })
+        .eq("id", payload.acceptedUpsellEventId)
+        .eq("accepted", true);
     }
 
     return NextResponse.json({ orderId: inserted.data.id, bill: result.bill }, { status: 201 });

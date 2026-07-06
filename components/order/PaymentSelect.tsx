@@ -11,7 +11,7 @@ const MODE_ICONS: Record<PaymentMode, string> = { cash: "💵", card: "💳", up
 export default function PaymentSelect() {
   const {
     customerName, phone, tableId, baseId, pizzaId, toppingIds, beverageIds, quantity,
-    paymentMode, setPaymentMode, setStep, setOrderId, setConfirmedBill,
+    paymentMode, setPaymentMode, setStep, setOrderId, setConfirmedBill, acceptedUpsellEventId,
   } = useOrder();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +30,7 @@ export default function PaymentSelect() {
         body: JSON.stringify({
           customerName, phone, tableId,
           baseId, pizzaId, toppingIds, beverageIds, quantity, paymentMode,
+          acceptedUpsellEventId,
         }),
       });
       const data = await res.json();

@@ -19,6 +19,7 @@ export interface OrderPayload {
   beverageIds?: string[];
   quantity: number;
   paymentMode: string;
+  acceptedUpsellEventId?: string | null;
 }
 
 export interface NewOrder {
