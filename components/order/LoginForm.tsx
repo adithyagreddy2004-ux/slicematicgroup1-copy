@@ -53,7 +53,7 @@ export default function LoginForm() {
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             placeholder="e.g. Rajan Sharma"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none backdrop-blur transition focus:border-[var(--accent)] focus:shadow-[0_0_16px_-4px_var(--accent)]"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 outline-none transition focus:border-[var(--accent)] focus:shadow-[0_0_16px_-4px_var(--accent)]"
           />
           {nameError && <p className="mt-1 text-sm text-red-400">{nameError}</p>}
         </div>
@@ -65,7 +65,7 @@ export default function LoginForm() {
             onChange={(e) => setPhone(e.target.value)}
             placeholder="10-digit mobile number"
             inputMode="numeric"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none backdrop-blur transition focus:border-[var(--accent)] focus:shadow-[0_0_16px_-4px_var(--accent)]"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 outline-none transition focus:border-[var(--accent)] focus:shadow-[0_0_16px_-4px_var(--accent)]"
           />
           {phoneError && <p className="mt-1 text-sm text-red-400">{phoneError}</p>}
         </div>
