@@ -1,0 +1,8 @@
+P1 ; Margherita ; 299
+P2 ; California Veggie ; 319
+P3 ; Farm House ; 329
+P4 ; Paneer Tikka ; 339
+P5 ; Greek Mediterranean ; 349
+P6 ; Pepperoni Classic ; 359
+P7 ; BBQ Chicken ; 369
+P8 ; Chicago Deep Dish ; 379
