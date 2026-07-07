@@ -1,0 +1,28 @@
+Timestamp   : 2026-07-07 20:25:36
+Customer    : Rahul Verma
+Phone       : 9876543210
+Base        : Thin Crust (Rs.149.00)
+Pizza       : California Veggie (Rs.319.00)
+Toppings    : Sweet Corn (Rs.39.00), Extra Cheese (Rs.69.00)
+Unit price  : Rs.576.00
+Quantity    : 6
+Subtotal    : Rs.3456.00
+Discount    : Rs.345.60
+GST (18%)   : Rs.559.87
+Total       : Rs.3670.27
+Payment     : UPI
+
+Timestamp   : 2026-07-07 20:26:02
+Customer    : Aisha Khan
+Phone       : 8123456789
+Base        : Cheese Burst (Rs.229.00)
+Pizza       : Paneer Tikka (Rs.339.00)
+Toppings    : none
+Unit price  : Rs.568.00
+Quantity    : 2
+Subtotal    : Rs.1136.00
+Discount    : Rs.0.00
+GST (18%)   : Rs.204.48
+Total       : Rs.1340.48
+Payment     : Cash
+
