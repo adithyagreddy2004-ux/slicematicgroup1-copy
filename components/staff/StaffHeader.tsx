@@ -15,6 +15,7 @@ export default function StaffHeader({ title }: { title: string }) {
   const links = [
     { href: "/kitchen", label: "Kitchen" },
     { href: "/admin", label: "Admin" },
+    { href: "/admin/menu", label: "Menu" },
     { href: "/admin/analytics", label: "Analytics" },
     { href: "/admin/insights", label: "Insights" },
     { href: "/admin/upsell", label: "Upsell" },

@@ -111,6 +111,7 @@ export default function MenuBuilder() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [qtyInput, setQtyInput] = useState(String(quantity));
   const [qtyError, setQtyError] = useState<string | null>(null);
+  const [showBill, setShowBill] = useState(false);
 
   const loadMenu = useCallback(() => {
     Promise.all([
@@ -246,12 +247,9 @@ export default function MenuBuilder() {
     >
       {/* pizza stage — stays pinned while the customer scrolls the menu.
           Opaque + blurred so scrolling menu items never bleed through onto the pizza. */}
-      <div className="sticky top-14 z-20 bg-[var(--background)]/95 px-6 pb-4 pt-3 shadow-[0_14px_26px_-16px_rgba(0,0,0,0.95)] backdrop-blur-md">
-        <p className="mb-1 text-center text-xs font-semibold uppercase tracking-[0.3em] text-[var(--accent)]">
-          Pizza forge
-        </p>
-        <h2 className="mb-2 text-center text-xl font-bold">
-          Build it live, {customerName.split(" ")[0]}
+      <div className="sticky top-14 z-20 bg-[var(--background)]/95 px-6 pb-2 pt-2 shadow-[0_14px_26px_-16px_rgba(0,0,0,0.95)] backdrop-blur-md">
+        <h2 className="mb-1 text-center text-base font-bold">
+          <span className="text-[var(--accent)]">Pizza forge</span> · Build it live, {customerName.split(" ")[0]}
         </h2>
         <PizzaCanvas
           base={selectedBase}
@@ -366,15 +364,49 @@ export default function MenuBuilder() {
         }}
       />
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-black/70 p-4 backdrop-blur-xl">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-black/70 p-3 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
           {bill ? (
             <>
-              <BillLines bill={bill} quantity={quantity} />
+              {/* Full breakdown stays collapsed by default so the menu stays visible.
+                  Tap "View bill" to expand it above the Continue button. */}
+              <AnimatePresence initial={false}>
+                {showBill && (
+                  <motion.div
+                    key="bill"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pb-3">
+                      <BillLines bill={bill} quantity={quantity} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setShowBill((v) => !v)}
+                  aria-expanded={showBill}
+                  className="flex items-center gap-1 text-xs font-medium text-zinc-400 transition hover:text-white"
+                >
+                  {showBill ? "Hide bill" : "View bill"}
+                  <span className={`inline-block transition-transform ${showBill ? "rotate-180" : ""}`}>▾</span>
+                </button>
+                <span className="text-xs text-zinc-500">
+                  {quantity} pizza{quantity > 1 ? "s" : ""}
+                  {bill.discount > 0 ? " · 10% off" : ""}
+                </span>
+              </div>
+
               <motion.button
                 onClick={() => setStep("payment")}
                 whileTap={{ scale: 0.97 }}
-                className="glow-button mt-3 w-full rounded-xl bg-[var(--accent)] py-3 font-semibold text-black"
+                className="glow-button mt-2 w-full rounded-xl bg-[var(--accent)] py-3 font-semibold text-black"
               >
                 Continue to payment · {formatINR(bill.total)}
               </motion.button>

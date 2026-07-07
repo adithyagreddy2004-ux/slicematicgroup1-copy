@@ -27,9 +27,12 @@ ordering flow.
 | `/admin` | Staff login | All-orders table |
 | `/admin/analytics` | Staff login | Sales / peak-hour / discount analytics |
 | `/admin/insights` | Staff login | Feedback insight miner dashboard |
+| `/admin/menu` | Staff login | Upload menu files → update DB tables |
 | `/admin/upsell` | Staff login | Smart upsell rules, stats, AI rule generation |
 | `/login` | — | Staff sign-in |
 | `POST /api/orders` | Server | Validated order creation |
+| `GET /api/orders/status?id=` | Server | Status-only lookup for the customer screen |
+| `POST /api/admin/menu` | Staff API | Parse + upsert an uploaded menu file |
 | `POST /api/waiter-call` | Server | Table assistance request |
 | `POST /api/feedback` | Server | Save post-order rating + comment |
 | `POST /api/ai/upsell` | Server | Customer-facing upsell suggestion |
@@ -65,8 +68,13 @@ The live menu lives in DB tables, seeded from `data/*.txt` by
 **editing `data/*.txt` and pushing does NOT change the cloud menu by itself.**
 To update the live menu, pick one:
 
+- **Admin → Menu (`/admin/menu`)** — upload a `ID ; Name ; Price` file per
+  category from the browser. Rows are matched by `id` (existing updated, new
+  added); malformed lines are skipped and listed; an all-invalid file is
+  rejected so the menu is never wiped. **This is the no-code path for Rajan** —
+  no repo commit or redeploy needed. Or
 - **`npm run seed`** with `.env.local` pointing at the cloud project — upserts
-  the txt files straight into the DB (fastest; no deploy). Or
+  the txt files straight into the DB. Or
 - Add a **new timestamped** seed migration (`npx tsx scripts/gen-seed-migration.ts`,
   then rename to a fresh `YYYYMMDDHHMMSS_*.sql`) and push it. Or
 - Edit the menu rows directly in the Supabase table editor.
@@ -93,10 +101,14 @@ GST-on-post-discount math, and server-side order building.
 3. Build order: quantity `0`, `11`, `2.5`, `three`, empty → all rejected inline.
 4. Quantity 5 → 10% discount line appears; GST computed on post-discount total.
 5. Payment: confirm without a mode → error. Pick UPI → confirmation message.
-6. Confirm order → animated receipt; order appears in `/kitchen` instantly.
+6. Confirm order → animated receipt; order appears in `/kitchen` instantly. The
+   customer's status screen (received → preparing → ready) only advances when
+   the kitchen marks it — it polls `/api/orders/status`, no fake timers.
 7. Tap "Call waiter" → amber alert in kitchen; Acknowledge clears it.
-8. `/kitchen` status toggle: received → preparing → ready.
+8. `/kitchen` status toggle: received → preparing → ready (watch the customer
+   screen follow it live).
 9. `/admin` → full orders table with items, totals, payment mode, timestamps.
+   `/admin/menu` → upload a menu file to update the DB live (skips bad lines).
 10. Edit `lib/pricing.ts` `DISCOUNT_THRESHOLD` 5 → 3, reload → discount at qty 3
     (the "change the threshold live" question).
 

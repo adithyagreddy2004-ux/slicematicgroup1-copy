@@ -8,15 +8,15 @@ import FeedbackForm from "./FeedbackForm";
 
 const MODE_LABELS: Record<string, string> = { cash: "Cash", card: "Card", upi: "UPI" };
 
-// Customer-facing theater. The kitchen controls the real order status;
-// this sequence just makes the wait feel alive.
-type Stage = "sent" | "oven" | "delivering" | "served";
+// The customer screen mirrors the kitchen's REAL order status. It only advances
+// when a staff member marks the order preparing / ready in /kitchen.
+// DB status: 'received' -> 'preparing' -> 'ready'.
+type Stage = "received" | "preparing" | "ready";
 
 const STAGE_COPY: Record<Stage, { title: string; sub: string }> = {
-  sent: { title: "Order beamed to the kitchen", sub: "Rajan's crew just got pinged…" },
-  oven: { title: "In the oven", sub: "450° of pure business." },
-  delivering: { title: "Out of the oven!", sub: "Gliding to your table…" },
-  served: { title: "Order locked in", sub: "Sit tight — it's on its way." },
+  received: { title: "Order received", sub: "Rajan's crew just got pinged — waiting to start." },
+  preparing: { title: "In the oven", sub: "450° of pure business. The kitchen is on it." },
+  ready: { title: "Ready to serve!", sub: "Fresh out of the oven — coming to your table." },
 };
 
 function MiniPizza({ size = 64 }: { size?: number }) {
@@ -96,58 +96,6 @@ function DeliveryScene({ tableId }: { tableId: string }) {
   );
 }
 
-function ServedScene() {
-  return (
-    <div className="relative mx-auto flex h-36 w-36 items-center justify-center">
-      {/* burst sparks */}
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i / 8) * Math.PI * 2;
-        return (
-          <motion.span
-            key={i}
-            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-            animate={{
-              x: Math.cos(angle) * 58,
-              y: Math.sin(angle) * 58,
-              opacity: 0,
-              scale: 0.3,
-            }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
-            className="absolute h-2 w-2 rounded-full bg-[var(--accent)]"
-          />
-        );
-      })}
-      <motion.div
-        initial={{ scale: 0.4 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 16 }}
-      >
-        <MiniPizza size={88} />
-      </motion.div>
-      <motion.svg
-        viewBox="0 0 40 40"
-        className="absolute -bottom-1 -right-1 h-10 w-10"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.3, type: "spring", stiffness: 400, damping: 18 }}
-      >
-        <circle cx="20" cy="20" r="18" fill="#10b981" />
-        <motion.path
-          d="M 12 20 L 18 26 L 29 14"
-          fill="none"
-          stroke="white"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ delay: 0.45, duration: 0.3 }}
-        />
-      </motion.svg>
-    </div>
-  );
-}
-
 function RadarPing() {
   return (
     <div className="relative mx-auto flex h-36 w-36 items-center justify-center">
@@ -165,20 +113,43 @@ function RadarPing() {
   );
 }
 
-const STAGE_ORDER: Stage[] = ["sent", "oven", "delivering", "served"];
+const STAGE_ORDER: Stage[] = ["received", "preparing", "ready"];
+
+function isStage(value: unknown): value is Stage {
+  return value === "received" || value === "preparing" || value === "ready";
+}
 
 export default function Confirmation() {
   const { customerName, tableId, orderId, confirmedBill, quantity, paymentMode, startNewOrder } = useOrder();
-  const [stage, setStage] = useState<Stage>("sent");
+  const [stage, setStage] = useState<Stage>("received");
 
+  // Poll the kitchen's real status (orders are staff-only under RLS, so the
+  // customer reads a status-only endpoint). Stops once the order is ready.
   useEffect(() => {
-    const timers = [
-      setTimeout(() => setStage("oven"), 1600),
-      setTimeout(() => setStage("delivering"), 5200),
-      setTimeout(() => setStage("served"), 7800),
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, []);
+    if (!orderId) return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/orders/status?id=${orderId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (active && isStage(data.status)) setStage(data.status);
+          if (data.status === "ready") return; // done — stop polling
+        }
+      } catch {
+        // transient — try again next tick
+      }
+      if (active) timer = setTimeout(poll, 4000);
+    };
+    poll();
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [orderId]);
 
   const copy = STAGE_COPY[stage];
   const stageIndex = STAGE_ORDER.indexOf(stage);
@@ -199,10 +170,9 @@ export default function Confirmation() {
             exit={{ opacity: 0, x: -24 }}
             transition={{ duration: 0.3 }}
           >
-            {stage === "sent" && <RadarPing />}
-            {stage === "oven" && <OvenScene />}
-            {stage === "delivering" && <DeliveryScene tableId={tableId} />}
-            {stage === "served" && <ServedScene />}
+            {stage === "received" && <RadarPing />}
+            {stage === "preparing" && <OvenScene />}
+            {stage === "ready" && <DeliveryScene tableId={tableId} />}
             <h2 className="mt-4 text-center text-xl font-bold">{copy.title}</h2>
             <p className="mt-1 text-center text-sm text-zinc-400">{copy.sub}</p>
           </motion.div>

@@ -356,7 +356,7 @@ export default function PizzaCanvas({
   }) : [];
 
   return (
-    <div className="relative mx-auto w-64 sm:w-72">
+    <div className="relative mx-auto w-40 sm:w-56">
       <svg viewBox="0 0 320 320" className="w-full drop-shadow-[0_18px_40px_rgba(255,92,26,0.18)]">
         <defs>
           <radialGradient id="pad-glow" cx="50%" cy="50%" r="50%">
