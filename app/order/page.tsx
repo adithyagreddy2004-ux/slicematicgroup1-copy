@@ -14,15 +14,24 @@ import { validateTableId } from "@/lib/validation";
 
 function Steps() {
   const { step } = useOrder();
+  const showBar = step !== "login";
   return (
     <main className="min-h-dvh">
-      <AnimatePresence mode="wait">
-        {step === "login" && <LoginForm key="login" />}
-        {step === "menu" && <MenuBuilder key="menu" />}
-        {step === "payment" && <PaymentSelect key="payment" />}
-        {step === "confirmed" && <Confirmation key="confirmed" />}
-      </AnimatePresence>
-      {step !== "login" && <CallWaiterButton />}
+      {/* Top assist bar — Call Waiter (+ Mood matcher, mounted by MenuBuilder)
+          sit on one line here so the flow starts below them, never overlapping. */}
+      {showBar && (
+        <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-2 border-b border-white/10 bg-black/70 px-3 backdrop-blur-xl">
+          <CallWaiterButton />
+        </div>
+      )}
+      <div className={showBar ? "pt-14" : ""}>
+        <AnimatePresence mode="wait">
+          {step === "login" && <LoginForm key="login" />}
+          {step === "menu" && <MenuBuilder key="menu" />}
+          {step === "payment" && <PaymentSelect key="payment" />}
+          {step === "confirmed" && <Confirmation key="confirmed" />}
+        </AnimatePresence>
+      </div>
     </main>
   );
 }

@@ -246,7 +246,7 @@ export default function MenuBuilder() {
     >
       {/* pizza stage — stays pinned while the customer scrolls the menu.
           Opaque + blurred so scrolling menu items never bleed through onto the pizza. */}
-      <div className="sticky top-0 z-20 bg-[var(--background)]/95 px-6 pb-4 pt-3 shadow-[0_14px_26px_-16px_rgba(0,0,0,0.95)] backdrop-blur-md">
+      <div className="sticky top-14 z-20 bg-[var(--background)]/95 px-6 pb-4 pt-3 shadow-[0_14px_26px_-16px_rgba(0,0,0,0.95)] backdrop-blur-md">
         <p className="mb-1 text-center text-xs font-semibold uppercase tracking-[0.3em] text-[var(--accent)]">
           Pizza forge
         </p>

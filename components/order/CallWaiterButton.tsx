@@ -36,7 +36,7 @@ export default function CallWaiterButton() {
   return (
     <button
       onClick={callWaiter}
-      className={`fixed bottom-56 left-4 z-40 rounded-full px-4 py-2 text-xs font-semibold shadow-lg backdrop-blur transition sm:bottom-52 sm:left-6 ${
+      className={`rounded-full px-4 py-2 text-xs font-semibold shadow-lg backdrop-blur transition ${
         state === "called"
           ? "bg-emerald-500 text-black"
           : state === "error"

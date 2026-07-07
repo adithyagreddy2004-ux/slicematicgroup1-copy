@@ -117,7 +117,7 @@ export default function MoodRecommender({
   }
 
   return (
-    <div className="fixed bottom-56 right-4 z-40 flex max-w-[calc(100vw-2rem)] justify-end sm:bottom-52 sm:right-6">
+    <div className="fixed right-3 top-2.5 z-50 flex max-w-[calc(100vw-1.5rem)] justify-end">
       <AnimatePresence mode="wait">
         {!open ? (
           <motion.button
@@ -137,7 +137,7 @@ export default function MoodRecommender({
         ) : (
           <motion.div
             key={`open-${promptCount}`}
-            initial={{ opacity: 0, scale: 0.95, y: promptCount === 1 ? 96 : 10 }}
+            initial={{ opacity: 0, scale: 0.95, y: -8 }}
             animate={{
               opacity: 1,
               scale: promptCount > 1 && !hasUsedMatcher ? [1, 1.015, 1] : 1,
@@ -150,7 +150,7 @@ export default function MoodRecommender({
                   ]
                 : "0 18px 50px rgba(0,0,0,0.45)",
             }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            exit={{ opacity: 0, scale: 0.95, y: -8 }}
             transition={{ duration: promptCount === 1 ? 0.45 : 0.35, ease: "easeOut" }}
             className="w-[21rem] max-w-full rounded-2xl border border-white/10 bg-black/85 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl"
           >
