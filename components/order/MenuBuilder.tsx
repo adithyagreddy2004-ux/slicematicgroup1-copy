@@ -6,7 +6,7 @@ import { useOrder } from "./OrderContext";
 import BillLines from "./BillLines";
 import MoodRecommender from "./MoodRecommender";
 import PizzaCanvas from "./PizzaCanvas";
-import UpsellSuggestion from "./UpsellSuggestion";
+import { useUpsell } from "./useUpsell";
 import { supabase } from "@/lib/supabase/client";
 import { computeBill, formatINR } from "@/lib/pricing";
 import { validateQuantity } from "@/lib/validation";
@@ -46,9 +46,11 @@ function SelectableCard({
   );
 }
 
-function SectionHeading({ n, label, done, hint }: { n: number; label: string; done: boolean; hint?: string }) {
+function SectionHeading({
+  n, label, done, hint, recommendation,
+}: { n: number; label: string; done: boolean; hint?: string; recommendation?: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-center gap-3">
+    <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
       <span
         className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-bold transition ${
           done
@@ -60,7 +62,42 @@ function SectionHeading({ n, label, done, hint }: { n: number; label: string; do
       </span>
       <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-300">{label}</h3>
       {hint && <span className="text-xs text-zinc-500">{hint}</span>}
+      {recommendation}
     </div>
+  );
+}
+
+// Inline, contextual add-on nudge shown next to the relevant section heading.
+function RecommendationChip({
+  item, message, onAdd, onSkip,
+}: { item: MenuItem; message: string; onAdd: () => void; onSkip: () => void }) {
+  return (
+    <motion.span
+      initial={{ opacity: 0, x: -6 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10 py-1 pl-2 pr-1"
+    >
+      <span className="text-[10px]">✨</span>
+      <span className="max-w-[9rem] truncate text-xs font-medium text-zinc-100" title={message}>
+        {item.name}
+      </span>
+      <span className="text-[10px] text-zinc-400">{formatINR(Number(item.price))}</span>
+      <button
+        type="button"
+        onClick={onAdd}
+        className="rounded-full bg-[var(--accent)] px-2 py-0.5 text-[10px] font-bold text-black"
+      >
+        Add
+      </button>
+      <button
+        type="button"
+        onClick={onSkip}
+        aria-label="Dismiss suggestion"
+        className="px-1 text-xs leading-none text-zinc-400 hover:text-white"
+      >
+        ×
+      </button>
+    </motion.span>
   );
 }
 
@@ -156,6 +193,24 @@ export default function MenuBuilder() {
     }
   }
 
+  // Contextual add-on suggestion, rendered inline next to the matching section.
+  const upsell = useUpsell({
+    base: selectedBase,
+    pizza: selectedPizza,
+    toppings: selectedToppings,
+    beverages: selectedBeverages,
+    quantity,
+  });
+  const recFor = (type: "base" | "pizza" | "topping" | "beverage") =>
+    upsell.suggestion && upsell.suggestion.suggestedType === type ? (
+      <RecommendationChip
+        item={upsell.suggestion.suggestedItem}
+        message={upsell.suggestion.message}
+        onAdd={upsell.accept}
+        onSkip={upsell.skip}
+      />
+    ) : null;
+
   if (loadState === "loading") {
     return (
       <div className="flex flex-col items-center gap-4 p-16">
@@ -220,7 +275,7 @@ export default function MenuBuilder() {
 
       <div className="space-y-8 px-6 pt-4">
         <section>
-          <SectionHeading n={1} label="Forge the dough" done={!!selectedBase} />
+          <SectionHeading n={1} label="Forge the dough" done={!!selectedBase} recommendation={recFor("base")} />
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {menu.bases.map((item) => (
               <SelectableCard key={item.id} item={item} selected={baseId === item.id} onSelect={() => setBaseId(item.id)} />
@@ -229,7 +284,7 @@ export default function MenuBuilder() {
         </section>
 
         <section>
-          <SectionHeading n={2} label="Pour the flavour" done={!!selectedPizza} />
+          <SectionHeading n={2} label="Pour the flavour" done={!!selectedPizza} recommendation={recFor("pizza")} />
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {menu.pizzas.map((item) => (
               <SelectableCard key={item.id} item={item} selected={pizzaId === item.id} onSelect={() => setPizzaId(item.id)} />
@@ -243,6 +298,7 @@ export default function MenuBuilder() {
             label="Rain the toppings"
             done={selectedToppings.length > 0}
             hint={selectedToppings.length > 0 ? `${selectedToppings.length} on board` : "optional"}
+            recommendation={recFor("topping")}
           />
           <div className="grid grid-cols-2 gap-2">
             {menu.toppings.map((item) => (
@@ -257,6 +313,7 @@ export default function MenuBuilder() {
             label="Grab a drink"
             done={selectedBeverages.length > 0}
             hint={selectedBeverages.length > 0 ? `${selectedBeverages.length} chilling` : "optional"}
+            recommendation={recFor("beverage")}
           />
           <div className="grid grid-cols-2 gap-2">
             {menu.beverages.map((item) => (
@@ -313,13 +370,6 @@ export default function MenuBuilder() {
         <div className="mx-auto max-w-md">
           {bill ? (
             <>
-              <UpsellSuggestion
-                base={selectedBase}
-                pizza={selectedPizza}
-                toppings={selectedToppings}
-                beverages={selectedBeverages}
-                quantity={quantity}
-              />
               <BillLines bill={bill} quantity={quantity} />
               <motion.button
                 onClick={() => setStep("payment")}
